@@ -1,0 +1,20 @@
+info:
+  contact: {}
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: logs user into the application returning an JWT token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      tags:
+      - Example
+swagger: "2.0"
