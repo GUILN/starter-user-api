@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/guiln/starter-log/logger"
 	"github.com/guiln/starter-log/messages"
@@ -18,9 +20,22 @@ func main() {
 	cfg := config.NewAppConfig().WithEnvVarGetter()
 	port := fmt.Sprintf(":%s", cfg.GetParameter("PORT"))
 
+	// Sentry
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:              "https://1f4807f97cdd40059b73be6f24e6d25c@o4504168838070272.ingest.sentry.io/4504170441146368",
+		TracesSampleRate: 1.0,
+	}); err != nil {
+		lggr.Error(messages.New("Error while starting sentry").WithError(err).Message())
+	}
+
+	defer sentry.Flush(2 * time.Second)
+
+	sentry.CaptureMessage("It works!")
+
 	router := buildRouter(lggr)
 	{
 		lggr.Info(messages.New(fmt.Sprintf("Starting at port: %s", port)).Message())
+		sentry.CaptureException(fmt.Errorf("Error!"))
 
 		if err := router.Run(port); err != nil {
 			lggr.Error(messages.New("Error while starting router").WithError(err).Message())
